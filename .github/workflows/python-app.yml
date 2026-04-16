@@ -28,7 +28,9 @@ jobs:
 
       - name: Add project to PYTHONPATH
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
-
+      - name: Lint code
+        run: |
+          flake8 .
       - name: Run tests
         run: pytest
 
