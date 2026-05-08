@@ -1,111 +1,111 @@
 import pytest
 from src import math_operations
 
-class TestPowFunction:
+class TestMathOperations:
     """
-    Tests for the newly added 'pow' function in math_operations.py.
+    Tests for the math_operations module, specifically focusing on the new floor_div function.
     """
 
-    @pytest.mark.parametrize(
-        "base, exponent, expected",
-        [
-            (2, 3, 8),          # Positive integers
-            (5, 0, 1),          # Exponent is zero
-            (0, 5, 0),          # Base is zero, positive exponent
-            (0, 0, 1),          # Zero to the power of zero (Python's behavior)
-            (-2, 3, -8),        # Negative base, odd exponent
-            (-2, 2, 4),         # Negative base, even exponent
-            (10, 1, 10),        # Exponent is one
-            (1, 10, 1),         # Base is one
-            (100, 2, 10000),    # Larger numbers
-            (1.5, 2, 2.25),     # Float base, integer exponent
-            (2, 0.5, pytest.approx(1.41421356237)), # Integer base, float exponent (sqrt)
-            (0.5, 0.5, pytest.approx(0.70710678118)), # Float base, float exponent
-        ],
-        ids=[
-            "positive_integers",
-            "exponent_zero",
-            "base_zero_positive_exponent",
-            "zero_to_zero",
-            "negative_base_odd_exponent",
-            "negative_base_even_exponent",
-            "exponent_one",
-            "base_one",
-            "larger_numbers",
-            "float_base_integer_exponent",
-            "integer_base_float_exponent",
-            "float_base_float_exponent",
-        ]
-    )
-    def test_pow_basic_cases(self, base, exponent, expected):
+    @pytest.mark.parametrize("a, b, expected", [
+        (10, 3, 3),
+        (10, 2, 5),
+        (7, 4, 1),
+        (0, 5, 0),
+        (5, 1, 5),
+        (100, 10, 10),
+        (1, 2, 0),
+        (-10, 3, -4),  # -3.33 -> -4
+        (-10, 2, -5),
+        (10, -3, -4),  # -3.33 -> -4
+        (-10, -3, 3),  # 3.33 -> 3
+        (-1, 2, -1),   # -0.5 -> -1
+        (1, -2, -1),   # -0.5 -> -1
+        (-2, 1, -2),
+        (-2, -1, 2),
+    ])
+    def test_floor_div_integers(self, a, b, expected):
         """
-        Verifies the 'pow' function with various valid numeric inputs,
-        including positive, negative, zero, and float bases/exponents.
+        Verifies the floor_div function with various integer inputs, including positive,
+        negative, and zero values, ensuring correct floor division behavior.
         """
-        assert math_operations.pow(base, exponent) == expected
+        assert math_operations.floor_div(a, b) == expected
 
-    @pytest.mark.parametrize(
-        "base, exponent, expected",
-        [
-            (2, -1, 0.5),       # Positive base, negative exponent
-            (2, -2, 0.25),      # Positive base, negative exponent
-            (0.5, -1, 2.0),     # Float base, negative exponent
-            (-2, -1, -0.5),     # Negative base, negative odd exponent
-            (-2, -2, 0.25),     # Negative base, negative even exponent
-        ],
-        ids=[
-            "positive_base_negative_exponent_1",
-            "positive_base_negative_exponent_2",
-            "float_base_negative_exponent",
-            "negative_base_negative_odd_exponent",
-            "negative_base_negative_even_exponent",
-        ]
-    )
-    def test_pow_negative_exponents(self, base, exponent, expected):
+    @pytest.mark.parametrize("a, b, expected", [
+        (10.5, 3.0, 3.0),
+        (10.0, 2.5, 4.0),
+        (7.8, 4.2, 1.0),
+        (0.0, 5.5, 0.0),
+        (5.1, 1.0, 5.0),
+        (1.0, 2.0, 0.0),
+        (-10.5, 3.0, -4.0),  # -3.5 -> -4.0
+        (-10.0, 2.5, -4.0),
+        (10.5, -3.0, -4.0),  # -3.5 -> -4.0
+        (-10.5, -3.0, 3.0),  # 3.5 -> 3.0
+        (-1.0, 2.0, -1.0),
+        (1.0, -2.0, -1.0),
+    ])
+    def test_floor_div_floats(self, a, b, expected):
         """
-        Verifies the 'pow' function correctly handles negative exponents,
-        resulting in fractional values.
+        Verifies the floor_div function with various floating-point inputs,
+        ensuring correct floor division behavior for floats.
         """
-        assert math_operations.pow(base, exponent) == expected
+        assert math_operations.floor_div(a, b) == expected
 
-    def test_pow_large_numbers(self):
+    def test_floor_div_by_zero_integers(self):
         """
-        Verifies the 'pow' function handles large integer inputs correctly.
+        Ensures that floor_div raises a ZeroDivisionError when the divisor is an integer zero.
         """
-        assert math_operations.pow(10, 10) == 10_000_000_000
-        assert math_operations.pow(2, 63) == 9223372036854775808
+        with pytest.raises(ZeroDivisionError):
+            math_operations.floor_div(10, 0)
 
-    @pytest.mark.parametrize(
-        "base, exponent",
-        [
-            ("a", 2),           # String base
-            (2, "b"),           # String exponent
-            (None, 2),          # None base
-            (2, None),          # None exponent
-            ([1], 2),           # List base
-            (2, {1}),           # Set exponent
-        ],
-        ids=[
-            "string_base",
-            "string_exponent",
-            "none_base",
-            "none_exponent",
-            "list_base",
-            "set_exponent",
-        ]
-    )
-    def test_pow_type_errors(self, base, exponent):
+    def test_floor_div_by_zero_floats(self):
         """
-        Verifies that 'pow' raises a TypeError when non-numeric types are provided
-        as base or exponent, as expected from Python's built-in `**` operator.
+        Ensures that floor_div raises a ZeroDivisionError when the divisor is a float zero.
+        """
+        with pytest.raises(ZeroDivisionError):
+            math_operations.floor_div(10.5, 0.0)
+
+    def test_floor_div_large_numbers(self):
+        """
+        Verifies floor_div with large integer inputs to ensure correctness and handle potential
+        overflows (though Python integers handle arbitrary size).
+        """
+        a = 10**18
+        b = 3
+        expected = 10**18 // 3
+        assert math_operations.floor_div(a, b) == expected
+
+    def test_floor_div_small_numbers(self):
+        """
+        Verifies floor_div with small floating-point numbers close to zero.
+        """
+        a = 0.0001
+        b = 0.00003
+        expected = a // b
+        assert math_operations.floor_div(a, b) == expected
+
+    def test_floor_div_result_type(self):
+        """
+        Verifies that the return type of floor_div is an integer for integer inputs
+        and a float for float inputs.
+        """
+        assert isinstance(math_operations.floor_div(10, 3), int)
+        assert isinstance(math_operations.floor_div(10.0, 3.0), float)
+        assert isinstance(math_operations.floor_div(10, 3.0), float)
+        assert isinstance(math_operations.floor_div(10.0, 3), float)
+
+    @pytest.mark.parametrize("a, b", [
+        ("10", 2),
+        (10, "2"),
+        ("10", "2"),
+        (None, 2),
+        (10, None),
+        ([10], 2),
+        (10, [2]),
+    ])
+    def test_floor_div_invalid_types(self, a, b):
+        """
+        Ensures that floor_div raises a TypeError for invalid input types (e.g., strings, None, lists).
         """
         with pytest.raises(TypeError):
-            math_operations.pow(base, exponent)
-
-    def test_pow_float_precision(self):
-        """
-        Verifies that 'pow' returns results with appropriate floating-point precision.
-        """
-        # Using pytest.approx for float comparisons
-        assert math_operations.pow(2.0, 0.5) == pytest.approx(1.4142135623730951)
-        assert math_operations.pow(3.14, 2.71) == pytest.approx(30.63914902047392)
+            math_operations.floor_div(a, b)
