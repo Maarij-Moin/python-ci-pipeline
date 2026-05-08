@@ -10,3 +10,5 @@ def mul(a,b):
     return a*b
 def mod(a,b):
     return a%b
+def pow(a,b):
+    return a**b
