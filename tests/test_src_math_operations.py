@@ -1,78 +1,81 @@
 import pytest
-import cmath # For comparing complex numbers
-from src.math_operations import sqrt
+import sys
+from src import math_operations as mo
 
-class TestSqrtFunction:
+class TestFactorial:
     """
-    Tests for the sqrt function added to math_operations.py.
+    Tests for the factorial function in src/math_operations.py.
     """
 
-    @pytest.mark.parametrize("input_val, expected_output", [
-        (4, 2.0),
-        (9, 3.0),
-        (1, 1.0),
-        (0, 0.0),
-        (100, 10.0),
-        (0.25, 0.5),
-        (2.25, 1.5),
-        (16.0, 4.0),
-        (0.0001, 0.01),
-        (1_000_000, 1000.0),
+    @pytest.mark.parametrize("n, expected", [
+        (0, 1),
+        (1, 1),
+        (2, 2),
+        (3, 6),
+        (4, 24),
+        (5, 120),
+        (10, 3628800),
     ])
-    def test_sqrt_positive_real_numbers(self, input_val, expected_output):
+    def test_factorial_positive_integers(self, n, expected):
         """
-        Verifies that sqrt correctly calculates the square root for positive real numbers (integers and floats).
+        Verifies that factorial returns the correct value for non-negative integers.
         """
-        assert sqrt(input_val) == expected_output
+        assert mo.factorial(n) == expected
 
-    def test_sqrt_non_perfect_square(self):
+    def test_factorial_large_number(self):
         """
-        Verifies that sqrt calculates the square root for a non-perfect square with reasonable precision.
+        Verifies that factorial handles a moderately large number correctly.
         """
-        assert sqrt(2) == pytest.approx(1.4142135623730951)
-        assert sqrt(3) == pytest.approx(1.7320508100000000)
+        # Factorial of 15 is 1,307,674,368,000
+        assert mo.factorial(15) == 1307674368000
 
-    def test_sqrt_negative_number_returns_complex(self):
+    def test_factorial_negative_integer_raises_recursion_error(self):
         """
-        Verifies that sqrt returns a complex number for negative input, as per Python's default behavior for `**0.5`.
+        Verifies that calling factorial with a negative integer raises a RecursionError
+        due to infinite recursion, as per the current implementation.
         """
-        result = sqrt(-4)
-        assert isinstance(result, complex)
-        assert result == cmath.sqrt(-4) # Compare with cmath.sqrt for correctness
-        assert result.real == pytest.approx(0.0)
-        assert result.imag == pytest.approx(2.0)
+        with pytest.raises(RecursionError):
+            mo.factorial(-1)
 
-        result_neg_float = sqrt(-9.0)
-        assert isinstance(result_neg_float, complex)
-        assert result_neg_float == cmath.sqrt(-9.0)
-        assert result_neg_float.real == pytest.approx(0.0)
-        assert result_neg_float.imag == pytest.approx(3.0)
+        with pytest.raises(RecursionError):
+            mo.factorial(-5)
 
-    def test_sqrt_large_float(self):
+    def test_factorial_float_raises_recursion_error(self):
         """
-        Verifies sqrt handles large floating-point numbers correctly.
+        Verifies that calling factorial with a float raises a RecursionError
+        due to infinite recursion, as per the current implementation (n-1 will never hit 0 or 1).
         """
-        large_num = 1.23456789e+20
-        expected_sqrt = large_num**0.5
-        assert sqrt(large_num) == pytest.approx(expected_sqrt)
+        with pytest.raises(RecursionError):
+            mo.factorial(2.5)
 
-    def test_sqrt_small_float(self):
-        """
-        Verifies sqrt handles very small floating-point numbers correctly.
-        """
-        small_num = 1.0e-30
-        expected_sqrt = small_num**0.5
-        assert sqrt(small_num) == pytest.approx(expected_sqrt)
+        with pytest.raises(RecursionError):
+            mo.factorial(0.5)
 
-    @pytest.mark.parametrize("input_val", [
-        "not_a_number",
+    @pytest.mark.parametrize("invalid_input", [
+        "abc",
         [1, 2],
+        {"a": 1},
         None,
-        {"key": "value"}
     ])
-    def test_sqrt_invalid_input_types(self, input_val):
+    def test_factorial_non_numeric_raises_type_error(self, invalid_input):
         """
-        Verifies that sqrt raises a TypeError for non-numeric input types.
+        Verifies that calling factorial with non-numeric input raises a TypeError.
         """
         with pytest.raises(TypeError):
-            sqrt(input_val)
+            mo.factorial(invalid_input)
+
+    def test_factorial_max_recursion_depth(self):
+        """
+        Verifies that calling factorial with a number that exceeds the default
+        recursion limit raises a RecursionError.
+        """
+        # Get the current recursion limit
+        recursion_limit = sys.getrecursionlimit()
+        # Test with a number slightly above the limit
+        n_exceeding_limit = recursion_limit + 10
+
+        # Temporarily increase recursion limit for this test if needed,
+        # but for a number like recursion_limit + 10, it should fail.
+        # The default limit is usually 1000.
+        with pytest.raises(RecursionError):
+            mo.factorial(n_exceeding_limit)
