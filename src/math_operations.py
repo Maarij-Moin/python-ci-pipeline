@@ -17,3 +17,9 @@ def floor_div(a,b):
 
 def sqrt(a):
     return a**0.5
+
+def factorial(n):
+    if n==0 or n==1:
+        return 1
+    else:
+        return n*factorial(n-1)
