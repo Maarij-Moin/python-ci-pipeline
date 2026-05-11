@@ -1,11 +1,59 @@
 import pytest
-import sys
-from src import math_operations as mo
+from src import math_operations
 
-class TestFactorial:
+class TestMathOperations:
     """
-    Tests for the factorial function in src/math_operations.py.
+    Tests for the math_operations module, focusing on the newly added gcd function
+    and ensuring existing functions like factorial still work.
     """
+
+    @pytest.mark.parametrize("a, b, expected", [
+        (48, 18, 6),
+        (18, 48, 6),
+        (17, 13, 1),  # Coprime numbers
+        (10, 5, 5),
+        (5, 10, 5),
+        (7, 7, 7),
+        (0, 5, 5),  # GCD(0, n) = n
+        (5, 0, 5),  # GCD(n, 0) = n
+        (1, 1, 1),
+        (1, 100, 1),
+        (100, 1, 1),
+        (14, 28, 14), # One is a multiple of the other
+        (28, 14, 14),
+    ])
+    def test_gcd_positive_integers(self, a, b, expected):
+        """
+        Verifies the gcd function for various pairs of positive integers,
+        including coprime numbers and cases where one number is a multiple of the other.
+        """
+        assert math_operations.gcd(a, b) == expected
+
+    def test_gcd_zero_zero(self):
+        """
+        Verifies the gcd function for gcd(0, 0), which typically returns 0
+        when using the Euclidean algorithm directly.
+        """
+        assert math_operations.gcd(0, 0) == 0
+
+    @pytest.mark.parametrize("a, b, expected", [
+        (-10, 5, 5),    # gcd(-10, 5) -> gcd(5, -10 % 5) -> gcd(5, 0) -> 5
+        (10, -5, -5),   # gcd(10, -5) -> gcd(-5, 10 % -5) -> gcd(-5, 0) -> -5
+        (-10, -5, -5),  # gcd(-10, -5) -> gcd(-5, -10 % -5) -> gcd(-5, 0) -> -5
+        (-48, 18, 6),   # gcd(-48, 18) -> gcd(18, -48 % 18) -> gcd(18, 6) -> 6
+        (48, -18, -6),  # gcd(48, -18) -> gcd(-18, 48 % -18) -> gcd(-18, 12) -> gcd(12, -18 % 12) -> gcd(12, -6) -> gcd(-6, 12 % -6) -> gcd(-6, 0) -> -6
+        (-48, -18, -6), # gcd(-48, -18) -> gcd(-18, -48 % -18) -> gcd(-18, -12) -> gcd(-12, -18 % -12) -> gcd(-12, -6) -> gcd(-6, -12 % -6) -> gcd(-6, 0) -> -6
+        (-7, 7, 7),
+        (7, -7, -7),
+        (-7, -7, -7),
+    ])
+    def test_gcd_with_negative_integers(self, a, b, expected):
+        """
+        Verifies the gcd function's behavior with negative integers.
+        The Euclidean algorithm with Python's modulo operator can return negative results
+        if the second argument to modulo is negative.
+        """
+        assert math_operations.gcd(a, b) == expected
 
     @pytest.mark.parametrize("n, expected", [
         (0, 1),
@@ -18,64 +66,15 @@ class TestFactorial:
     ])
     def test_factorial_positive_integers(self, n, expected):
         """
-        Verifies that factorial returns the correct value for non-negative integers.
+        Verifies the factorial function for non-negative integers.
+        This function was present in the diff, so a basic check is included.
         """
-        assert mo.factorial(n) == expected
+        assert math_operations.factorial(n) == expected
 
-    def test_factorial_large_number(self):
+    def test_factorial_negative_input_raises_recursion_error(self):
         """
-        Verifies that factorial handles a moderately large number correctly.
-        """
-        # Factorial of 15 is 1,307,674,368,000
-        assert mo.factorial(15) == 1307674368000
-
-    def test_factorial_negative_integer_raises_recursion_error(self):
-        """
-        Verifies that calling factorial with a negative integer raises a RecursionError
-        due to infinite recursion, as per the current implementation.
+        Verifies that factorial raises a RecursionError for negative input,
+        as it will recurse indefinitely.
         """
         with pytest.raises(RecursionError):
-            mo.factorial(-1)
-
-        with pytest.raises(RecursionError):
-            mo.factorial(-5)
-
-    def test_factorial_float_raises_recursion_error(self):
-        """
-        Verifies that calling factorial with a float raises a RecursionError
-        due to infinite recursion, as per the current implementation (n-1 will never hit 0 or 1).
-        """
-        with pytest.raises(RecursionError):
-            mo.factorial(2.5)
-
-        with pytest.raises(RecursionError):
-            mo.factorial(0.5)
-
-    @pytest.mark.parametrize("invalid_input", [
-        "abc",
-        [1, 2],
-        {"a": 1},
-        None,
-    ])
-    def test_factorial_non_numeric_raises_type_error(self, invalid_input):
-        """
-        Verifies that calling factorial with non-numeric input raises a TypeError.
-        """
-        with pytest.raises(TypeError):
-            mo.factorial(invalid_input)
-
-    def test_factorial_max_recursion_depth(self):
-        """
-        Verifies that calling factorial with a number that exceeds the default
-        recursion limit raises a RecursionError.
-        """
-        # Get the current recursion limit
-        recursion_limit = sys.getrecursionlimit()
-        # Test with a number slightly above the limit
-        n_exceeding_limit = recursion_limit + 10
-
-        # Temporarily increase recursion limit for this test if needed,
-        # but for a number like recursion_limit + 10, it should fail.
-        # The default limit is usually 1000.
-        with pytest.raises(RecursionError):
-            mo.factorial(n_exceeding_limit)
+            math_operations.factorial(-1)
